@@ -1,0 +1,27 @@
+{
+    "name": "rdm/stack-logger",
+    "description": "A composite logger which can log multiple channels simultaneously.",
+    "type": "package",
+    "license": "MIT",
+    "keywords": [
+        "Laravel Log",
+        "Laravel Monolog"
+    ],
+    "authors": [
+        {
+            "name": "Joseph Li",
+            "email": "joseph101039@gmail.com"
+        }
+    ],
+    "require": {
+        "php" : ">=7.1.0|^8.0",
+        "nunomaduro/collision": ">=2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "RDM\\StackLogger\\": "src"
+        }
+
+    },
+    "minimum-stability": "dev"
+}
