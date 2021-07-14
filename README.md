@@ -15,7 +15,7 @@
 3. [Logger 使用方法](#chapter-3)
 4. [程式碼範例](#chapter-4)
 
-## 1. 安裝步驟<a name="chapter-1"></a>
+## 1. 安裝步驟 <a name="chapter-1"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
 
 ###(1) 執行安裝指令:
 
@@ -145,7 +145,7 @@ return [
  [Laravel Logging - Creating Monolog Handler Channel](https://laravel.com/docs/8.x/logging#creating-monolog-handler-channels)
 <br/>
 
-## 2. Logger 各別介紹與 config 設置<a name="chapter-2"></a>
+## 2. Logger 各別介紹與 config 設置<a name="chapter-2"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
 
 打開 `config/logging.php` 中可以看到新添加入的 logger 底下將各別作介紹。
 
@@ -224,7 +224,7 @@ return [
     + disable_notification: 關閉通知提示音
     + api_key: 註冊機器人時 Telegram 官方提供的 Telegram Bot API Token 
 
-## 3. Logger 使用方法<a name="chapter-3"></a>
+## 3. Logger 使用方法<a name="chapter-3"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
 
 你可以使用整合進 stack_logger driver 的 SettleLog Facade (以下簡稱 **SettleLog**)<br/>
 也可以使用 laravel 原生的 Log Facade (以下簡稱 **Log**) 執行 logging。<br/>
@@ -240,6 +240,8 @@ return [
 
 以下為 **SettleLog** 支援的函式介紹
 
+<a name="interface1"></a>
+
 | PHP PSR-3 介面, 所有 logger 共同支援 | [範例1](#example1) |
 | :-------------------------------------------------------------| :----------------- |
 | `static void emergency(string $message, array $context = [])` | 系統不可用 |
@@ -252,12 +254,16 @@ return [
 | `static void debug(string $message, array $context = [])` | debug 詳情 |
 | `static void log($level, string $message, array $context = [])` | 任意等級的日誌記錄, [$level](#https://github.com/php-fig/log/blob/master/Psr/Log/LogLevel.php) 僅限連結中任一值 |
 
+<a name="interface2"></a>
+
 | 其他相容 Laravel Console 介面 | |
 | :-------------------------------------------------------------| :----------------- |
 | `static void line(string $out, array $context = [])` | 同 debug() |
 | `static void comment(string $out, array $context = [])` | 同 debug() |
 | `static void warn(string $out, array $context = [])` | 同 warning() |
 | `static string ask(string $out)` | 詢問問題並等待使用者輸入, 回傳使用者答案 |
+
+<a name="interface3"></a>
 
 | 本地 Log 檔案相關 - [file logger](#file) | [範例2](#example2) |
 | :-------------------------------------------------------------| :----------------- |
@@ -266,6 +272,8 @@ return [
 | `static string getLocalLogPath()` | 取得 log 檔案路徑 |
 | `static self clearLogFile(string $path)` | 清除 log 檔案內容 |
 | `static self deleteLogFile(string $path)` | 刪除 log 檔案 |
+
+<a name="interface4"></a>
 
 | GCP Storage 檔案處理相關 - [storage logger](#storage) |   |
 | :-------------------------------------------------------------| :----------------- |
@@ -277,11 +285,14 @@ return [
 | <code>static self setStorageUploadFilePath(string $path)</code> | 設置 Storage 上傳本地檔案的路徑 |
 | <code>static string&#124;null getStorageUploadFilePath()</code> | 取得 Storage 被上傳本地檔案的路徑 |
 
+<a name="interface5"></a>
 
 | GCP StackDriver 相關 - [stackdriver logger](#stackdriver) | [範例2](#example2)  |
 | :-------------------------------------------------------------| :----------------- |
 | <code>static self setStackDriverLogName(string $name)</code> | 設置 logName 名稱, 作為 [Google console 頁面查詢條件](https://cloud.google.com/logging/docs/view/overview#search_performance) |
 | <code>static string&#124;null getStackDriverLink()</code> | 取得 Google 記錄檔探索工具 瀏覽頁面的 log 連結 |
+
+<a name="interface6"></a>
 
 | Telegram 相關 - [telegram logger](#telegram) | [範例3](#example3) |
 | :-------------------------------------------------------------| :----------------- |
@@ -291,6 +302,7 @@ return [
 | `static self disableTelegramNotification(string $chat_id)` | 關閉通知提示音 |
 | `static self enableTelegramNotification(string $chat_id)` | 開啟通知提示音 |
 
+<a name="interface7"></a>
 
 | 例外處理 | [範例1](#example1) |
 | :-------------------------------------------------------------| :----------------- |
@@ -299,12 +311,16 @@ return [
 | `static void failIf($condition, $error_message, $success_message = '', $throw = false)` | 如果 condition 為假, log $error_message, 否則 log $success_message, 如果 $throw 為真會拋出例外 |
 | `static void failUnless($condition, $error_message, $success_message = '', $throw = false)` | 如果 condition 為真, log $error_message, 否則 log $success_message, 如果 $throw 為真會拋出例外 |
 
+<a name="interface8"></a>
+
 | 計時器功能 | [範例4](#example4), [範例5](#example5) |
 | :-------------------------------------------------------------| :----------------- |
 | `static void watch()` | 開始計時, 在第一次呼叫 timing 前呼叫 |
 | `static string timing(string $out, bool $return = false)` | 印出附帶距離上次呼叫 timing 或 watch 的時間間隔, $return 為 true 表示只回傳字串而不會 logging |
 | `static Timer createTimer()` | 創立一個計時器 |
 | `static Timer[] createTimers(int $count_of_timers = 1)` | 創立多個計時器 |
+
+<a name="interface9"></a>
 
 | MySQL Log 相關 | [範例6](#example6) |
 | :-------------------------------------------------------------| :----------------- |
@@ -320,9 +336,11 @@ return [
 | `static void destroy()` | Facade 摧毀自身實例, 可以用在當想要清除設定值的時候, 例如在 laravel queue 的 job 結尾呼叫, 避免設定值影響到下一個 job |
 
 
-## 程式碼範例<a name="chapter-4"></a>
+## 程式碼範例<a name="chapter-4"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
 
-1. Log 成功與錯誤訊息 <a name="example1"></a>
+1. Log 成功與錯誤訊息 
+<a name="example1"></a>
+<sub>[跳至函式](#interface1)</sub>
 
     ```php
     use RDM\StackLogger\Facades\SettleLog;
@@ -348,7 +366,9 @@ return [
     }
     ```
 
-2. 設置 Log 路徑 <a name="example2"></a>
+2. 設置 Log 路徑 
+<a name="example3"></a>
+<sub>[跳至函式](#interface2)</sub>
 
     ```php
     use RDM\StackLogger\Facades\SettleLog;
@@ -364,7 +384,9 @@ return [
     fprintf("All messages are export to stackdriver: %s", SettleLog::getStackDriverLink());     // 取得 stackdriver log 存取連結
     ```
 
-3. telegram <a name="example3"></a>
+3. telegram 
+<a name="example6"></a>
+<sub>[跳至函式](#interface3)</sub>
 
     ```php
     use RDM\StackLogger\Facades\SettleLog;
@@ -376,7 +398,9 @@ return [
     SettleLog::emergency('SOS! System Crashed');    // 送出通知
     ```
 
-4. 計時器 1 <a name="example4"></a>
+4. 計時器 1
+<a name="example4"></a>
+<sub>[跳至函式](#interface8)</sub>
 
     ```php
    use RDM\StackLogger\Facades\SettleLog;
@@ -401,7 +425,9 @@ return [
    */
    ```
    
-5. 計時器 2 <a name="example5"></a>
+5. 計時器 2 
+<a name="example5"></a>
+<sub>[跳至函式](#interface8)</sub>
 
     ```php
    use RDM\StackLogger\Facades\SettleLog;
@@ -413,6 +439,7 @@ return [
       $timer->start();
       sleep(1);
       $timer->stop();
+       sleep(2);
     }
     echo (string)$timer;
    
@@ -422,7 +449,10 @@ return [
    */
    ```
    
-6. SQL Log <a name="example6"></a>
+6. SQL Log 
+<a name="example6"></a>
+<sub>[跳至函式](#interface9)</sub>
+
     ```php
    use RDM\StackLogger\Facades\SettleLog;
    use Illuminate\Support\Facades\DB;
@@ -436,14 +466,4 @@ return [
    ```
 
 
-<br/>
-<br>
-<br>
-<br>
-
-<style>
-table {
-    width:100%;
-}
-</style>
 
