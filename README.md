@@ -10,7 +10,7 @@
 
 ## Table of contents
 
-1. [安裝步驟]((#chapter-1))
+1. [安裝步驟](#chapter-1)
 2. [Logger 各別介紹與設置](#chapter-2)
 3. [Logger 使用方法](#chapter-3)
 4. [程式碼範例](#chapter-4)
@@ -367,7 +367,7 @@ return [
     ```
 
 2. 設置 Log 路徑 
-<a name="example3"></a>
+<a name="example2"></a>
 <sub>[跳至函式](#interface2)</sub>
 
     ```php
@@ -385,7 +385,7 @@ return [
     ```
 
 3. telegram 
-<a name="example6"></a>
+<a name="example3"></a>
 <sub>[跳至函式](#interface3)</sub>
 
     ```php
