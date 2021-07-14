@@ -368,7 +368,7 @@ return [
 
 2. 設置 Log 路徑 
 <a name="example2"></a>
-<sub>[跳至函式](#interface2)</sub>
+<sub>[跳至函式](#interface3)</sub>
 
     ```php
     use RDM\StackLogger\Facades\SettleLog;
@@ -386,7 +386,7 @@ return [
 
 3. telegram 
 <a name="example3"></a>
-<sub>[跳至函式](#interface3)</sub>
+<sub>[跳至函式](#interface6)</sub>
 
     ```php
     use RDM\StackLogger\Facades\SettleLog;
