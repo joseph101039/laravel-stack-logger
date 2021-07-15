@@ -15,20 +15,27 @@ trait MysqlLoggingTrait
     #
     #######################################
 
-    public function clearQueryLog($connection = null)
-    {
-        DB::connection($connection)->statement("truncate mysql.general_log");
-    }
-
-    public function enableQueryLog($connection = null)
+    /**
+     * 啟用 General log, 每一項查詢將會被記錄到 mysql.general_log
+     * @param string|null $connection
+     *
+     * @return $this
+     */
+    public function enableMysqlGeneralLog($connection = null)
     {
         DB::connection($connection)->statement("set global general_log='ON'");
         DB::connection($connection)->statement("set global log_output='TABLE'");
+        return $this;
     }
 
-    public function disableQueryLog($connection = null)
+    public function disableMysqlGeneralLog($connection = null)
     {
         DB::connection($connection)->statement("set global general_log='OFF'");
+    }
+
+    public function clearMysqlGeneralLog($connection = null)
+    {
+        DB::connection($connection)->statement("truncate mysql.general_log");
     }
 
     #######################################
@@ -41,19 +48,19 @@ trait MysqlLoggingTrait
      * @param int  $long_query_time 幾秒以上被視為慢查詢
      * @param null $connection
      */
-    public function enableSlowQueryLog($long_query_time = 1, $connection = null)
+    public function enableMysqlSlowLog($long_query_time = 1, $connection = null)
     {
         DB::connection($connection)->statement("set global slow_query_log='ON'");
         DB::connection($connection)->statement("set global log_output='TABLE'");
         DB::connection($connection)->statement("set global long_query_time={$long_query_time}");
     }
 
-    public function disableSlowQueryLog($connection = null)
+    public function disableMysqlSlowLog($connection = null)
     {
         DB::connection($connection)->statement("set global slow_query_log='OFF'");
     }
 
-    public function clearSlowQueryLog($connection = null)
+    public function clearMysqlSlowLog($connection = null)
     {
         DB::connection($connection)->statement("truncate mysql.slow_log");
     }

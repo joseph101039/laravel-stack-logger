@@ -1,5 +1,5 @@
 {
-    "name": "rdm/stack-logger",
+    "name": "trd-rdm/stack-logger",
     "description": "A composite logger which can log multiple channels simultaneously.",
     "type": "package",
     "license": "MIT",
