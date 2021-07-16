@@ -334,6 +334,11 @@ return [
 | 其他 | |
 | :-------------------------------------------------------------| :----------------- |
 | `static void destroy()` | Facade 摧毀自身實例, 可以用在當想要清除設定值的時候, 例如在 laravel queue 的 job 結尾呼叫, 避免設定值影響到下一個 job |
+| `static mixed console()` | 取得 console logger 實例 |
+| `static mixed file()` | 取得 file logger 實例 |
+| `static mixed storage()` | 取得 storage logger 實例 |
+| `static mixed stackdriver()` | 取得 stackdriver logger 實例 |
+| `static mixed telegram()` | 取得 telegram logger 實例 |
 
 
 ## 程式碼範例<a name="chapter-4"></a> <sub>[[返回目錄]](#table-of-contents)</sub>

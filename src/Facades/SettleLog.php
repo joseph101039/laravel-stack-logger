@@ -1,7 +1,12 @@
 <?php
 namespace RDM\StackLogger\Facades;
 
-use \RDM\StackLogger\Processors\Timer;
+use RDM\StackLogger\Handlers\ConsoleLogger;
+use RDM\StackLogger\Handlers\FileLogger;
+use RDM\StackLogger\Handlers\GcpStorageLogger;
+use RDM\StackLogger\Handlers\StackdriverLogger;
+use RDM\StackLogger\Handlers\TelegramLogger;
+use RDM\StackLogger\Processors\Timer;
 use Illuminate\Support\Facades\Facade;
 
 /**
@@ -76,9 +81,12 @@ use Illuminate\Support\Facades\Facade;
  * @method static self disableMysqlSlowLog($connection = null) 停用 Slow log
  * @method static self clearMysqlSlowLog($connection = null)   清除 mysql.slow_log
  *
- * @example SettleLog::error('message')
- * @example SettleLog::skipLog()->skipStorage()->info('message')
- * @example SettleLog::watch(); ... SettleLog::timing('description');
+ *                                                     * 取得各類 logger 實例
+ * @method static ConsoleLogger console($connection = null)         取得 console logger
+ * @method static FileLogger file($connection = null)               取得 file logger
+ * @method static GcpStorageLogger storage($connection = null)      取得 storage logger
+ * @method static StackdriverLogger stackdriver($connection = null) 取得 stackdriver logger
+ * @method static TelegramLogger telegram($connection = null)       取得 telegram logger
  */
 
 

@@ -2,7 +2,6 @@
 
 namespace RDM\StackLogger\Managers;
 
-use App\Facades\SettleLog;
 use RDM\StackLogger\Interfaces\LaravelConsoleInterface;
 use RDM\StackLogger\Processors\Timer;
 use RDM\StackLogger\Processors\TimerHandler;
@@ -12,7 +11,7 @@ use RDM\StackLogger\Traits\GcpStackdriverLoggerTrait;
 use RDM\StackLogger\Traits\GcpStorageLoggerTrait;
 use RDM\StackLogger\Traits\MysqlLoggingTrait;
 use RDM\StackLogger\Traits\TelegramLoggerTrait;
-use App\Providers\StackLoggerServiceProvider;
+use RDM\StackLogger\StackLoggerServiceProvider;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -20,8 +19,6 @@ use Monolog\Handler\HandlerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- *
- * Trait CommandLoggerTrait
  * 同時達到 Command 終端輸出與 Logging (以下依照 Syslog 等級排序)
  * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  */
@@ -233,63 +230,4 @@ class SettleLogManager implements LoggerInterface, LaravelConsoleInterface
         $this->failUnless($condition, $error_message, $success_message, true);
     }
 
-}
-
-Class LoggerCallback
-{
-    /**
-     * The underlying object.
-     * @var mixed
-     */
-    protected $value;
-
-    /**
-     * Execute the call back after the function is called
-     * @var array
-     */
-    protected $callbacks;
-
-    /**
-     * Create a new optional instance.
-     *
-     * @param mixed $value - return value
-     * @return void
-     */
-    public function __construct($value)
-    {
-        $this->value = $value;
-        $this->callbacks = [];
-    }
-
-    /**
-     * Dynamically pass a method to the underlying object.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     */
-    public function __call($method, $parameters)
-    {
-
-        if ($this->value instanceof SettleLogger) {
-            $return_value = $this->value->{$method}(...$parameters);    // call CommandLoggerTrait function
-
-            if ($this->value->_isMethodRequireResetSkip($method)) {
-                foreach ($this->callbacks as $callback) {
-                    $this->execCallback($callback);
-                }
-            }
-            return $return_value;
-        }
-    }
-
-    /**
-     * @param callable $callbacks
-     * @return $this
-     */
-    public function addCallback($callbacks)
-    {
-        $this->callbacks[] = $callbacks;
-        return $this;
-    }
 }
