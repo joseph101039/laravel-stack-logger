@@ -20,7 +20,7 @@
 ###(1) 執行安裝指令:
 
 ```bash 
-    composer require trd-rdm/stack-logger
+    composer require trd-rdm/stack-logger --with-all-dependencies
 ```
 
 ###(2) 註冊 Service Provider 以使用 Log Facade:
@@ -36,7 +36,7 @@
 ]
 ```
 
-###(3) 添加註冊多種 logging 以支援 facade logger 功能:
+###(3) 添加註冊多種 loggers 以支援 facade 功能:
 
 打開 `config/logging.php` 添加以下 logger 到 <i>channels</i> 陣列中
 ```php
@@ -256,7 +256,7 @@ return [
 
 <a name="interface2"></a>
 
-| 其他相容 Laravel Console 介面 | |
+| 其他相容 [Laravel Console](https://laravel.com/docs/8.x/artisan#command-io) 介面 | |
 | :-------------------------------------------------------------| :----------------- |
 | `static void line(string $out, array $context = [])` | 同 debug() |
 | `static void comment(string $out, array $context = [])` | 同 debug() |
@@ -270,8 +270,8 @@ return [
 | `static self setLocalLogPath(string $path)` | 設置 log 檔案路徑 |
 | `static self setCustomLogPath(string $path)` | 同 setLocalLogPath() |
 | `static string getLocalLogPath()` | 取得 log 檔案路徑 |
-| `static self clearLogFile(string $path)` | 清除 log 檔案內容 |
-| `static self deleteLogFile(string $path)` | 刪除 log 檔案 |
+| `static self clearLogFile()`      | 清除 log 檔案內容 |
+| `static self deleteLogFile()`     | 刪除 log 檔案 |
 
 <a name="interface4"></a>
 

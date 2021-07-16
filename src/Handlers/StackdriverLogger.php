@@ -68,6 +68,18 @@ class StackdriverLogger extends PsrHandler implements GcpLoggingInterface
      */
     protected  $gcpProjectId;
 
+
+    /**
+     * @var bool 是否批次送出 API
+     */
+    protected $batchEnabled;
+
+
+    /**
+     * @var string 憑證檔案路徑
+     */
+    protected $credentialPath;
+
     /**
      * @param string          $name           The name of the log to write entries to.
      * @param string          $gcp_project_id  GCP Project ID
@@ -83,21 +95,10 @@ class StackdriverLogger extends PsrHandler implements GcpLoggingInterface
 
         $this->gcpProjectId = $gcp_project_id;
         $this->name = $name;
+        $this->batchEnabled = $batch_enabled;
 
-        # 註冊憑證
-        $credential_path = base_path($credential_path);
-        if (!is_file($credential_path)) {
-            throw new \Exception("Credential file '{$credential_path}' for GCP project '{$this->gcpProjectId}' is not found");
-        }
-
-        $this->loggingClient = new LoggingClient($config = [
-            'projectId' => $this->gcpProjectId,
-            'keyFilePath' => $credential_path,
-        ]);
-
-        $this->loggers[$this->name] = $this->loggingClient->psrLogger($this->name, $options = [
-            'batchEnabled' => $batch_enabled,     // 會稍微 delay 異步批次送出, 設置成 false 則會立即送出但是效能較差
-        ]);
+        # 憑證檔案
+        $this->credentialPath= base_path($credential_path);
     }
 
     /**
@@ -134,6 +135,10 @@ class StackdriverLogger extends PsrHandler implements GcpLoggingInterface
          */
         $logging_gcs_bucket = '_Default';
         $logging_bucket_view = '_Default';
+
+        if (! $this->name || ! $this->gcpProjectId) {
+            return null;
+        }
 
         $queries = http_build_query([
             'query' => "logName=\"projects/{$this->gcpProjectId}/logs/{$this->name}\"",
@@ -208,9 +213,31 @@ class StackdriverLogger extends PsrHandler implements GcpLoggingInterface
     private function getLoggers($name)
     {
         if (!isset($this->loggers[$name])) {
-            $this->loggers[$name] = $this->loggingClient->logger($name);
+            // Check if the loggingClient is initialized.
+
+            if (! $this->loggingClient) {
+                $this->instantizeGoogleClient();
+            }
+
+            $this->loggers[$name] = $this->loggingClient->psrLogger($this->name, $options = [
+                'batchEnabled' => $this->batchEnabled,     // 會稍微 delay 異步批次送出, 設置成 false 則會立即送出但是效能較差
+            ]);
         }
 
         return $this->loggers[$name];
+    }
+
+
+    private function instantizeGoogleClient()
+    {
+        // 不在 construct 初始化, 因為在建構子初始化失敗, 不會拋出例外
+        if (!is_file($this->credentialPath)) {
+            throw new \Exception("Credential file '{$this->credentialPath}' for stackdriver logger is not found");
+        }
+
+        $this->loggingClient = new LoggingClient($config = [
+            'projectId' => $this->gcpProjectId,
+            'keyFilePath' => $this->credentialPath,
+        ]);
     }
 }

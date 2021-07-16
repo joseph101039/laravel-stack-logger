@@ -31,9 +31,9 @@ use Illuminate\Support\Facades\Facade;
  * 本地 Log 檔案相關
  * @method static self setLocalLogPath(string $path)       設置 log 檔案路徑
  * @method static self setCustomLogPath(string $path)      同 setLocalLogPath()
- * @method static string getLocalLogPath()     取得 log 檔案路徑
- * @method static self clearLogFile(string $path)          清除 log 檔案內容
- * @method static self deleteLogFile(string $path)         刪除 log 檔案 *
+ * @method static string getLocalLogPath()                 取得 log 檔案路徑
+ * @method static self clearLogFile()                      清除 log 檔案內容
+ * @method static self deleteLogFile()                     刪除 log 檔案
  *
  * GCP Storage 檔案處理相關
  * @method static self setStorageBucketFolder(string $path)  設置 Bucket id 底下的跟資料夾路徑

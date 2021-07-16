@@ -31,6 +31,17 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
     private $bucketId;
 
     /**
+     * @var string 憑證檔案路徑
+     */
+    private $credientialFile;
+
+    /**
+     * @var string GCP 專案名稱
+     */
+    private $gcpProjectId;
+
+
+    /**
      * @var string 此 logger 在 bucket 底下的 root 路徑
      */
     private $bucketRoot;
@@ -46,8 +57,6 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
     private $uploadFilePath;
 
     /**
-     *
-     * @param bool            $locking Attempt to lock the log file before writing to it
      * @param LoggerInterface $logger  The underlying PSR-3 compliant logger to which messages will be proxied
      * @param string|int      $level   The minimum logging level at which this handler will be triggered
      * @param bool            $bubble  Whether the messages that are handled can bubble up the stack or not
@@ -63,26 +72,18 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
     )
     {
         parent::__construct($logger, $level, $bubble);
+        $this->bucket = null;
 
-        # 註冊憑證
-        $credential_path = base_path($credential_path);
-        if (!is_file($credential_path)) {
-            throw new \Exception("Credential file '{$credential_path}' for GCP project '{$gcp_project_id}' is not found");
-        }
+        # 憑證檔案
+        $this->credientialFile = base_path($credential_path);
+        $this->gcpProjectId = $gcp_project_id;
 
-        $storage_client = new StorageClient([
-            'keyFilePath' => $credential_path,
-            'projectId'   => $gcp_project_id,
-        ]);
 
         # 設置 bucket 檔案路徑
         $this->bucketId = $bucket_id;
         $this->bucketRoot = $bucket_folder;
         $this->bucketPath = null;
         $this->uploadFilePath = null;
-
-
-        $this->bucket = $storage_client->bucket($this->bucketId);
     }
 
     /**
@@ -90,8 +91,28 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
      */
     public function handle(array $record): bool
     {
+        // 不在 construct 初始化, 因為在建構子初始化失敗, 不會拋出例外
+        if (!$this->bucket) {
+            $this->instantizeBucket();
+        }
+
         $this->upload();
-        return parent::handle($record);     // todo
+        return parent::handle($record);
+    }
+
+    private function instantizeBucket()
+    {
+
+        if (!is_file($this->credientialFile)) {
+            throw new \Exception("Credential file '{$this->credientialFile}' for 'storage' logger is not found");
+        }
+
+        $storage_client = new StorageClient([
+            'keyFilePath' => $this->credientialFile,
+            'projectId'   => $this->gcpProjectId,
+        ]);
+
+        $this->bucket = $storage_client->bucket($this->bucketId);
     }
 
 
@@ -157,6 +178,9 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
     public function getLink(): ?string
     {
         $path = ltrim($this->getObjectPath(), DIRECTORY_SEPARATOR);
+        if (!$path) {
+            return null;
+        }
         return sprintf("http://storage.googleapis.com/%s/%s", $this->bucketId, $path);
     }
 
@@ -166,7 +190,7 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
      */
     public function upload()
     {
-        if (!$object_path = $this->getPath()) {
+        if (!$source_path = $this->getPath()) {
             return false;
         }
 
@@ -180,7 +204,7 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
             ]
         ];
 
-        $source = fopen($object_path, 'r');
+        $source = fopen($source_path, 'r');
         /**
          * 上傳檔案內容
          * @see \Google\Cloud\Storage\Bucket::upload

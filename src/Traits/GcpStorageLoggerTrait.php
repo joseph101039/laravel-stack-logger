@@ -30,7 +30,7 @@ trait GcpStorageLoggerTrait
      */
     public function setStorageBucketFolder(string $folder)
     {
-        $this->getStorageChannel()->setBucketPath($folder);
+        $this->getStorageChannel()->setBucketFolder($folder);
         return $this;
     }
 
