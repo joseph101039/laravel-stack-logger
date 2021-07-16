@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @mixin  \Psr\Log\LoggerInterface
- * @see     \RDM\StackLogger\Managers\SettleLogManager
+ * @see     \RDM\StackLogger\Managers\GCPLogManager
  *
  * final static string destroy() - 清除所有的設置到預設值, 摧毀 facade instance, 下次呼叫時重建新 instance, 若有修改到路徑等設置請務必呼叫此函式, 避免 queue 影響到下一個 job
  *
@@ -90,11 +90,10 @@ use Illuminate\Support\Facades\Facade;
  */
 
 
-Class SettleLog extends Facade
+Class GCPLog extends Facade implements FacadeInterface
 {
     /**
-     * Bind the class as alias 'settleLog' in facades :
-     * @see SettleLogProvider::register()
+     * @see GCPLogProvider::register()
      * @return string
      */
     protected static function getFacadeAccessor()

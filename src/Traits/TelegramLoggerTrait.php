@@ -77,7 +77,7 @@ trait TelegramLoggerTrait
     /**
      * @return TelegramLogger|\Monolog\Handler\HandlerInterface|null
      */
-    private function getTelegramChannel()
+    protected function getTelegramChannel()
     {
         return $this->getMonologHandler(self::$channel);
     }

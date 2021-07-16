@@ -106,7 +106,7 @@ trait FileLoggerTrait
     /**
      * @return FileLogger|HandlerInterface|null
      */
-    private function getFileChannel()
+    protected function getFileChannel()
     {
         return $this->getMonologHandler(self::$fileChannel);
     }

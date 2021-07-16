@@ -31,7 +31,7 @@ class StackLoggerServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('stackLogger', function($app) {
-            return new \RDM\StackLogger\Managers\SettleLogManager(config('logging.channels.' . self::CHANNEL));
+            return new \RDM\StackLogger\Managers\GCPLogManager(config('logging.channels.' . self::CHANNEL));
         });
     }
 
@@ -47,7 +47,7 @@ class StackLoggerServiceProvider extends ServiceProvider
 
     public function provides()
     {
-        return ['stackLogger'];   // 或是 \App\Facades\SettleLog::class 都可以
+        return ['stackLogger'];   // 或是 \RDM\StackLogger\Facades\GCPLog::class 都可以
     }
 
 

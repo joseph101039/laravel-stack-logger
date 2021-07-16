@@ -22,20 +22,14 @@ use Psr\Log\LoggerInterface;
  * 同時達到 Command 終端輸出與 Logging (以下依照 Syslog 等級排序)
  * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  */
-class SettleLogManager implements LoggerInterface, LaravelConsoleInterface
+class GCPLogManager implements LoggerInterface, LaravelConsoleInterface
 {
-    use ConsoleLoggerTrait;
-
-    use FileLoggerTrait; // 實作檔案介面
-
-    use GcpStorageLoggerTrait;  // 實作 GCP Storage 介面
-
-    use GcpStackdriverLoggerTrait;  // 實作 GCP Stackdriver Log 介面
-
-    use TelegramLoggerTrait; // 實作 telegram 介面
-
-    use MysqlLoggingTrait;      // Mysql logging 開關
-
+    use ConsoleLoggerTrait, // 實作 console 介面
+        FileLoggerTrait, // 實作檔案介面
+        GcpStorageLoggerTrait,  // 實作 GCP Storage 介面
+        GcpStackdriverLoggerTrait,  // 實作 GCP Stackdriver Log 介面
+        TelegramLoggerTrait, // 實作 telegram 介面
+        MysqlLoggingTrait;      // Mysql logging 開關
     /**
      * @var TimerHandler 處理計時相關任務
      */
@@ -229,5 +223,36 @@ class SettleLogManager implements LoggerInterface, LaravelConsoleInterface
     public function throwUnless($condition, $error_message, $success_message = '') {
         $this->failUnless($condition, $error_message, $success_message, true);
     }
+
+
+
+    #############################################
+    #       取得 Channel instance
+    ############################################
+    public function console()
+    {
+        return $this->getConsoleChannel();
+    }
+
+    public function file()
+    {
+        return $this->getFileChannel();
+    }
+
+    public function storage()
+    {
+        return $this->getStorageChannel();
+    }
+
+    public function stackdriver()
+    {
+        return $this->getStackdriverChannel();
+    }
+
+    public function telegram()
+    {
+        return $this->getTelegramChannel();
+    }
+
 
 }
