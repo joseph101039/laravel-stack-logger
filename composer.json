@@ -16,7 +16,7 @@
     "require": {
         "php" : ">=7.1.0|^8.0",
         "nunomaduro/collision": ">=2.0",
-        "google/cloud": "^v0.158"
+        "google/cloud": "^0.158"
     },
     "autoload": {
         "psr-4": {

@@ -17,13 +17,13 @@
 
 ## 1. 安裝步驟 <a name="chapter-1"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
 
-###(1) 執行安裝指令:
+### (1) 執行安裝指令:
 
 ```bash 
     composer require trd-rdm/stack-logger --with-all-dependencies
 ```
 
-###(2) 註冊 Service Provider 以使用 Log Facade:
+### (2) 註冊 Service Provider 以使用 Log Facade:
 
 打開 `app/config.php` 在 providers 陣列底下添加 ```RDM\StackLogger\StackLoggerServiceProvider``` 註冊 facade
 
@@ -36,9 +36,10 @@
 ]
 ```
 
-###(3) 添加註冊多種 loggers 以支援 facade 功能:
+### (3) 添加註冊多種 loggers 以支援 facade 功能:
 
-打開 `config/logging.php` 添加以下 logger 到 <i>channels</i> 陣列中
+打開 `config/logging.php` 添加以下 logger 到 <i>channels</i> 陣列中,
+根據需求調整 stack_logger 中 channels 的內容, 但[不建議添加 storage](#storage_upload_exception)。
 ```php
 return [
     
@@ -46,7 +47,7 @@ return [
         /**
          * Log Facade
          * 主要 logger , 以 stack driver 結合多個 custom log 同時呼叫
-         * 加入 channels 的 driver 可以在 Facade 中呼叫
+         * 加入 channels 的 driver 可以在 GCPLog 中呼叫
          */
         'stack_logger'   => [
             'driver'            => 'stack',
@@ -98,6 +99,7 @@ return [
                 'bucket_id'     => 'your-storage-bucket-id',     // GCP Storage bucket 名稱
                 'bucket_folder' => 'bucket-folder1/folder2',       // 此 logger 在 bucket id 底下的 root 路徑
                 'bucket_path'   => '',                          // bucket_folder 底下的檔案路徑, 需要使用者用 setPath() 設置後才能寫入
+                'ignore_exceptions' => false,                   // 上傳失敗時不要拋出例外
             ],
         ],
 
@@ -151,7 +153,7 @@ return [
 
 1. ##### stack_logger
 
-    首先 stack_logger 即 [Log Facade](src/Facades/GCPLog.php) 功能,
+    首先 stack_logger 即 [GCPLog Facade](src/Facades/GCPLog.php) 功能,
     他是一種 [Laravel Log stack 類型](https://laravel.com/docs/8.x/logging#building-log-stacks), 
     
     需要設置的參數有:
@@ -192,7 +194,12 @@ return [
 
     上傳檔案到 Google Cloud Storage,
     使用此 log 的話每寫入一行 log 就會, 
-    同步 file logger 設置的檔案內容到你指定的 Storage Bucket 檔案之中。
+    同步上傳 file logger 設置的檔案內容到你指定的 Storage Bucket 檔案之中。
+       
+    <a name="storage_upload_exception"></a>
+    \* 請注意兩次呼叫 storage logger (上傳) 的時間間隔過短, 會使得 Google API 上傳拋出例外,
+    如果要忽略例外的話, 請將 `ignore_exceptions` 參數設成 `true`。
+    
     
     需要設置的參數有:
     + gcp_project_id :GCP 專案名稱 
@@ -200,6 +207,7 @@ return [
     + bucket_id: Storage Bucket 名稱
     + bucket_folder: Storage 檔案在 bucket 底下的資料夾, 通常執行時不變動
     + bucket_path: Storage 檔案在 bucket_folder 底下的路徑
+    + ignore_exceptions: 寫 log (上傳檔案) 失敗時不要拋出例外
 
 5. ##### stackdriver
 
@@ -472,7 +480,7 @@ return [
    GCPLog::disableMysqlGeneralLog($connection);   // 停用 mysql general log
    ```
 
-6. SQL Log 
+7. 呼叫內部 logger 函式 (不建議) 
 <a name="example7"></a>
 <sub>[跳至函式](#interface10)</sub>
 

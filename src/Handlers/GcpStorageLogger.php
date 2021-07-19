@@ -57,6 +57,11 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
     private $uploadFilePath;
 
     /**
+     * @var bool 上傳失敗時不要拋出例外
+     */
+    private $ignoreExceptions;
+
+    /**
      * @param LoggerInterface $logger  The underlying PSR-3 compliant logger to which messages will be proxied
      * @param string|int      $level   The minimum logging level at which this handler will be triggered
      * @param bool            $bubble  Whether the messages that are handled can bubble up the stack or not
@@ -66,6 +71,7 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
         string $credential_path,
         string $bucket_id,
         string $bucket_folder,
+        bool $ignore_exceptions,
         LoggerInterface $logger,
         $level = Logger::DEBUG,
         bool $bubble = true
@@ -84,6 +90,7 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
         $this->bucketRoot = $bucket_folder;
         $this->bucketPath = null;
         $this->uploadFilePath = null;
+        $this->ignoreExceptions = $ignore_exceptions;
     }
 
     /**
@@ -96,7 +103,13 @@ class GcpStorageLogger extends PsrHandler implements GcpLoggingInterface
             $this->instantizeBucket();
         }
 
-        $this->upload();
+        try {
+            $this->upload();
+        } catch (\Exception $e) {
+            if (! $this->ignoreExceptions) {
+                throw $e;
+            }
+        }
         return parent::handle($record);
     }
 
