@@ -2,7 +2,7 @@
 
 namespace RDM\StackLogger\Facades;
 
-interface SettleFacadeInterface
+interface FacadeInterface
 {
     /**
      * 清除所有的設置到預設值, 摧毀 facade instance, 下次呼叫時重建新 instance

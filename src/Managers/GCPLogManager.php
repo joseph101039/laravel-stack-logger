@@ -2,7 +2,6 @@
 
 namespace RDM\StackLogger\Managers;
 
-use App\Facades\SettleLog;
 use RDM\StackLogger\Interfaces\LaravelConsoleInterface;
 use RDM\StackLogger\Processors\Timer;
 use RDM\StackLogger\Processors\TimerHandler;
@@ -12,7 +11,7 @@ use RDM\StackLogger\Traits\GcpStackdriverLoggerTrait;
 use RDM\StackLogger\Traits\GcpStorageLoggerTrait;
 use RDM\StackLogger\Traits\MysqlLoggingTrait;
 use RDM\StackLogger\Traits\TelegramLoggerTrait;
-use App\Providers\StackLoggerServiceProvider;
+use RDM\StackLogger\StackLoggerServiceProvider;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
@@ -20,25 +19,17 @@ use Monolog\Handler\HandlerInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- *
- * Trait CommandLoggerTrait
  * 同時達到 Command 終端輸出與 Logging (以下依照 Syslog 等級排序)
  * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  */
-class SettleLogManager implements LoggerInterface, LaravelConsoleInterface
+class GCPLogManager implements LoggerInterface, LaravelConsoleInterface
 {
-    use ConsoleLoggerTrait;
-
-    use FileLoggerTrait; // 實作檔案介面
-
-    use GcpStorageLoggerTrait;  // 實作 GCP Storage 介面
-
-    use GcpStackdriverLoggerTrait;  // 實作 GCP Stackdriver Log 介面
-
-    use TelegramLoggerTrait; // 實作 telegram 介面
-
-    use MysqlLoggingTrait;      // Mysql logging 開關
-
+    use ConsoleLoggerTrait, // 實作 console 介面
+        FileLoggerTrait, // 實作檔案介面
+        GcpStorageLoggerTrait,  // 實作 GCP Storage 介面
+        GcpStackdriverLoggerTrait,  // 實作 GCP Stackdriver Log 介面
+        TelegramLoggerTrait, // 實作 telegram 介面
+        MysqlLoggingTrait;      // Mysql logging 開關
     /**
      * @var TimerHandler 處理計時相關任務
      */
@@ -233,63 +224,35 @@ class SettleLogManager implements LoggerInterface, LaravelConsoleInterface
         $this->failUnless($condition, $error_message, $success_message, true);
     }
 
-}
 
-Class LoggerCallback
-{
-    /**
-     * The underlying object.
-     * @var mixed
-     */
-    protected $value;
 
-    /**
-     * Execute the call back after the function is called
-     * @var array
-     */
-    protected $callbacks;
-
-    /**
-     * Create a new optional instance.
-     *
-     * @param mixed $value - return value
-     * @return void
-     */
-    public function __construct($value)
+    #############################################
+    #       取得 Channel instance
+    ############################################
+    public function console()
     {
-        $this->value = $value;
-        $this->callbacks = [];
+        return $this->getConsoleChannel();
     }
 
-    /**
-     * Dynamically pass a method to the underlying object.
-     *
-     * @param string $method
-     * @param array $parameters
-     * @return mixed
-     */
-    public function __call($method, $parameters)
+    public function file()
     {
-
-        if ($this->value instanceof SettleLogger) {
-            $return_value = $this->value->{$method}(...$parameters);    // call CommandLoggerTrait function
-
-            if ($this->value->_isMethodRequireResetSkip($method)) {
-                foreach ($this->callbacks as $callback) {
-                    $this->execCallback($callback);
-                }
-            }
-            return $return_value;
-        }
+        return $this->getFileChannel();
     }
 
-    /**
-     * @param callable $callbacks
-     * @return $this
-     */
-    public function addCallback($callbacks)
+    public function storage()
     {
-        $this->callbacks[] = $callbacks;
-        return $this;
+        return $this->getStorageChannel();
     }
+
+    public function stackdriver()
+    {
+        return $this->getStackdriverChannel();
+    }
+
+    public function telegram()
+    {
+        return $this->getTelegramChannel();
+    }
+
+
 }

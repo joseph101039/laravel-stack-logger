@@ -22,10 +22,21 @@ trait FileLoggerTrait
      * @param string $path
      * @return FileLoggerTrait
      */
-    public function setCustomLogPath(string $path)
+    public function setLocalLogPath(string $path)
     {
         $this->getFileChannel()->setPath($path);
         return $this;
+    }
+
+    /**
+     * 設置檔案路徑
+     *
+     * @param string $path
+     * @return FileLoggerTrait
+     */
+    public function setCustomLogPath(string $path)
+    {
+        return $this->setLocalLogPath($path);
     }
 
     /**
@@ -95,7 +106,7 @@ trait FileLoggerTrait
     /**
      * @return FileLogger|HandlerInterface|null
      */
-    private function getFileChannel()
+    protected function getFileChannel()
     {
         return $this->getMonologHandler(self::$fileChannel);
     }

@@ -38,7 +38,7 @@ trait GcpStackdriverLoggerTrait
     /**
      * @return StackdriverLogger|\Monolog\Handler\HandlerInterface|null
      */
-    private function getStackdriverChannel()
+    protected function getStackdriverChannel()
     {
         return $this->getMonologHandler(self::$stackdriverChannel);
     }

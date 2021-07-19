@@ -1,12 +1,17 @@
 <?php
 namespace RDM\StackLogger\Facades;
 
-use \RDM\StackLogger\Processors\Timer;
+use RDM\StackLogger\Handlers\ConsoleLogger;
+use RDM\StackLogger\Handlers\FileLogger;
+use RDM\StackLogger\Handlers\GcpStorageLogger;
+use RDM\StackLogger\Handlers\StackdriverLogger;
+use RDM\StackLogger\Handlers\TelegramLogger;
+use RDM\StackLogger\Processors\Timer;
 use Illuminate\Support\Facades\Facade;
 
 /**
  * @mixin  \Psr\Log\LoggerInterface
- * @see     \RDM\StackLogger\Managers\SettleLogManager
+ * @see     \RDM\StackLogger\Managers\GCPLogManager
  *
  * final static string destroy() - 清除所有的設置到預設值, 摧毀 facade instance, 下次呼叫時重建新 instance, 若有修改到路徑等設置請務必呼叫此函式, 避免 queue 影響到下一個 job
  *
@@ -31,9 +36,9 @@ use Illuminate\Support\Facades\Facade;
  * 本地 Log 檔案相關
  * @method static self setLocalLogPath(string $path)       設置 log 檔案路徑
  * @method static self setCustomLogPath(string $path)      同 setLocalLogPath()
- * @method static string getLocalLogPath()     取得 log 檔案路徑
- * @method static self clearLogFile(string $path)          清除 log 檔案內容
- * @method static self deleteLogFile(string $path)         刪除 log 檔案 *
+ * @method static string getLocalLogPath()                 取得 log 檔案路徑
+ * @method static self clearLogFile()                      清除 log 檔案內容
+ * @method static self deleteLogFile()                     刪除 log 檔案
  *
  * GCP Storage 檔案處理相關
  * @method static self setStorageBucketFolder(string $path)  設置 Bucket id 底下的跟資料夾路徑
@@ -76,17 +81,19 @@ use Illuminate\Support\Facades\Facade;
  * @method static self disableMysqlSlowLog($connection = null) 停用 Slow log
  * @method static self clearMysqlSlowLog($connection = null)   清除 mysql.slow_log
  *
- * @example SettleLog::error('message')
- * @example SettleLog::skipLog()->skipStorage()->info('message')
- * @example SettleLog::watch(); ... SettleLog::timing('description');
+ *                                                     * 取得各類 logger 實例
+ * @method static ConsoleLogger console($connection = null)         取得 console logger
+ * @method static FileLogger file($connection = null)               取得 file logger
+ * @method static GcpStorageLogger storage($connection = null)      取得 storage logger
+ * @method static StackdriverLogger stackdriver($connection = null) 取得 stackdriver logger
+ * @method static TelegramLogger telegram($connection = null)       取得 telegram logger
  */
 
 
-Class SettleLog extends Facade
+Class GCPLog extends Facade implements FacadeInterface
 {
     /**
-     * Bind the class as alias 'settleLog' in facades :
-     * @see SettleLogProvider::register()
+     * @see GCPLogProvider::register()
      * @return string
      */
     protected static function getFacadeAccessor()

@@ -76,7 +76,7 @@ class ConsoleLogger extends PsrHandler implements LoggerInterface
 
     public function emergency($message, array $context = array())
     {
-        $this->block($message, $context, 'emergency', 'fg=white;bg=red;options=bold,underscore', true);
+        $this->block($message, $context, 'emergency', 'fg=black;bg=red;options=bold,underscore', true);
     }
 
     public function alert($message, array $context = array())
@@ -93,7 +93,7 @@ class ConsoleLogger extends PsrHandler implements LoggerInterface
 
     public function critical($message, array $context = array())
     {
-        $this->block($message, $context, 'critical', 'fg=white;bg=red');
+        $this->block($message, $context, 'critical', 'fg=black;bg=red');
     }
 
     public function error($message, array $context = array())
@@ -103,7 +103,7 @@ class ConsoleLogger extends PsrHandler implements LoggerInterface
 
     public function warning($message, array $context = array())
     {
-        $this->block($message, $context, null, 'fg=black;bg=yellow;options=underscore');
+        $this->block($message, $context, null, 'fg=yellow;options=underscore');
     }
 
     public function notice($message, array $context = array())

@@ -17,13 +17,13 @@
 
 ## 1. 安裝步驟 <a name="chapter-1"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
 
-###(1) 執行安裝指令:
+### (1) 執行安裝指令:
 
 ```bash 
-    composer require trd-rdm/stack-logger
+    composer require trd-rdm/stack-logger --with-all-dependencies
 ```
 
-###(2) 註冊 Service Provider 以使用 Log Facade:
+### (2) 註冊 Service Provider 以使用 Log Facade:
 
 打開 `app/config.php` 在 providers 陣列底下添加 ```RDM\StackLogger\StackLoggerServiceProvider``` 註冊 facade
 
@@ -36,9 +36,10 @@
 ]
 ```
 
-###(3) 添加註冊多種 logging 以支援 facade logger 功能:
+### (3) 添加註冊多種 loggers 以支援 facade 功能:
 
-打開 `config/logging.php` 添加以下 logger 到 <i>channels</i> 陣列中
+打開 `config/logging.php` 添加以下 logger 到 <i>channels</i> 陣列中,
+根據需求調整 stack_logger 中 channels 的內容, 但[不建議添加 storage](#storage_upload_exception)。
 ```php
 return [
     
@@ -46,7 +47,7 @@ return [
         /**
          * Log Facade
          * 主要 logger , 以 stack driver 結合多個 custom log 同時呼叫
-         * 加入 channels 的 driver 可以在 Facade 中呼叫
+         * 加入 channels 的 driver 可以在 GCPLog 中呼叫
          */
         'stack_logger'   => [
             'driver'            => 'stack',
@@ -98,6 +99,7 @@ return [
                 'bucket_id'     => 'your-storage-bucket-id',     // GCP Storage bucket 名稱
                 'bucket_folder' => 'bucket-folder1/folder2',       // 此 logger 在 bucket id 底下的 root 路徑
                 'bucket_path'   => '',                          // bucket_folder 底下的檔案路徑, 需要使用者用 setPath() 設置後才能寫入
+                'ignore_exceptions' => false,                   // 上傳失敗時不要拋出例外
             ],
         ],
 
@@ -151,7 +153,7 @@ return [
 
 1. ##### stack_logger
 
-    首先 stack_logger 即 [Log Facade](src/Facades/SettleLog.php) 功能,
+    首先 stack_logger 即 [GCPLog Facade](src/Facades/GCPLog.php) 功能,
     他是一種 [Laravel Log stack 類型](https://laravel.com/docs/8.x/logging#building-log-stacks), 
     
     需要設置的參數有:
@@ -192,7 +194,12 @@ return [
 
     上傳檔案到 Google Cloud Storage,
     使用此 log 的話每寫入一行 log 就會, 
-    同步 file logger 設置的檔案內容到你指定的 Storage Bucket 檔案之中。
+    同步上傳 file logger 設置的檔案內容到你指定的 Storage Bucket 檔案之中。
+       
+    <a name="storage_upload_exception"></a>
+    \* 請注意兩次呼叫 storage logger (上傳) 的時間間隔過短, 會使得 Google API 上傳拋出例外,
+    如果要忽略例外的話, 請將 `ignore_exceptions` 參數設成 `true`。
+    
     
     需要設置的參數有:
     + gcp_project_id :GCP 專案名稱 
@@ -200,6 +207,7 @@ return [
     + bucket_id: Storage Bucket 名稱
     + bucket_folder: Storage 檔案在 bucket 底下的資料夾, 通常執行時不變動
     + bucket_path: Storage 檔案在 bucket_folder 底下的路徑
+    + ignore_exceptions: 寫 log (上傳檔案) 失敗時不要拋出例外
 
 5. ##### stackdriver
 
@@ -226,7 +234,7 @@ return [
 
 ## 3. Logger 使用方法<a name="chapter-3"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
 
-你可以使用整合進 stack_logger driver 的 SettleLog Facade (以下簡稱 **SettleLog**)<br/>
+你可以使用整合進 stack_logger driver 的 GCPLog Facade (以下簡稱 **GCPLog**)<br/>
 也可以使用 laravel 原生的 Log Facade (以下簡稱 **Log**) 執行 logging。<br/>
 
 但是 **Log** 僅支援 [PSR-3 標準的介面函式](https://www.php-fig.org/psr/psr-3/), 
@@ -234,11 +242,11 @@ return [
 以修改 logger 參數, 比如設置檔案路徑等, 
 執行期針對 config 的異動不會影響到已經建立靜態 (static) 實例的 **Log**。
 
-而 **SettleLog** 提供一些介面讓你能在執行期設置參數, 
+而 **GCPLog** 提供一些介面讓你能在執行期設置參數, 
 以及整合部分 logging 以外的除錯函式方便程式人員開發。
 
 
-以下為 **SettleLog** 支援的函式介紹
+以下為 **GCPLog** 支援的函式介紹
 
 <a name="interface1"></a>
 
@@ -256,7 +264,7 @@ return [
 
 <a name="interface2"></a>
 
-| 其他相容 Laravel Console 介面 | |
+| 其他相容 [Laravel Console](https://laravel.com/docs/8.x/artisan#command-io) 介面 | |
 | :-------------------------------------------------------------| :----------------- |
 | `static void line(string $out, array $context = [])` | 同 debug() |
 | `static void comment(string $out, array $context = [])` | 同 debug() |
@@ -270,8 +278,8 @@ return [
 | `static self setLocalLogPath(string $path)` | 設置 log 檔案路徑 |
 | `static self setCustomLogPath(string $path)` | 同 setLocalLogPath() |
 | `static string getLocalLogPath()` | 取得 log 檔案路徑 |
-| `static self clearLogFile(string $path)` | 清除 log 檔案內容 |
-| `static self deleteLogFile(string $path)` | 刪除 log 檔案 |
+| `static self clearLogFile()`      | 清除 log 檔案內容 |
+| `static self deleteLogFile()`     | 刪除 log 檔案 |
 
 <a name="interface4"></a>
 
@@ -331,9 +339,16 @@ return [
 | `static self disableSlowQueryLog($connection = null)` | 停用 Slow log |
 | `static self clearSlowQueryLog($connection = null)` | 清除 mysql.slow_log |
 
-| 其他 | |
+<a name="interface10"></a>
+
+| 其他 | [範例7](#example7) |
 | :-------------------------------------------------------------| :----------------- |
 | `static void destroy()` | Facade 摧毀自身實例, 可以用在當想要清除設定值的時候, 例如在 laravel queue 的 job 結尾呼叫, 避免設定值影響到下一個 job |
+| `static mixed console()` | 取得 console logger 實例 |
+| `static mixed file()` | 取得 file logger 實例 |
+| `static mixed storage()` | 取得 storage logger 實例 |
+| `static mixed stackdriver()` | 取得 stackdriver logger 實例 |
+| `static mixed telegram()` | 取得 telegram logger 實例 |
 
 
 ## 程式碼範例<a name="chapter-4"></a> <sub>[[返回目錄]](#table-of-contents)</sub>
@@ -343,26 +358,26 @@ return [
 <sub>[跳至函式](#interface1)</sub>
 
     ```php
-    use RDM\StackLogger\Facades\SettleLog;
+    use RDM\StackLogger\Facades\GCPLog;
     use \Psr\Log\LogLevel;
     
     // 成功訊息 
-    SettleLog::info('success');
+    GCPLog::info('success');
 
     // 同上成功訊息
-    SettleLog::log(LogLevel::INFO, 'success', ['success' => true, 'result' => []]);
+    GCPLog::log(LogLevel::INFO, 'success', ['success' => true, 'result' => []]);
     
     try {
             // ...
     } catch (\Exception $exception) {
         // 錯誤訊息
-        SettleLog::error('something wrong');
+        GCPLog::error('something wrong');
         
         // 印出漂亮格式的錯誤訊息
-        SettleLog::renderException($exception);
+        GCPLog::renderException($exception);
     
         // 匯出例外訊息成 HTML 檔
-        SettleLog:dumpExceptionPrettyPage($exception, storage_path('exception.html'));
+        GCPLog:dumpExceptionPrettyPage($exception, storage_path('exception.html'));
     }
     ```
 
@@ -371,17 +386,17 @@ return [
 <sub>[跳至函式](#interface3)</sub>
 
     ```php
-    use RDM\StackLogger\Facades\SettleLog;
+    use RDM\StackLogger\Facades\GCPLog;
     
     // 設置路徑參數
-    SettleLog::setLocalLogPath(storage_path('logs/err.log'))    // 設置 log 檔案參數
+    GCPLog::setLocalLogPath(storage_path('logs/err.log'))    // 設置 log 檔案參數
         ->setStackDriverLogName('stack-driver-log-name');       // 設置 stackdriver log 名稱
        
-    SettleLog::info("message");
+    GCPLog::info("message");
     
     // 讀取路徑參數
-    fprintf("All messages are written at file %s", SettleLog::getLocalLogPath());   // 取得 log 檔案路徑
-    fprintf("All messages are export to stackdriver: %s", SettleLog::getStackDriverLink());     // 取得 stackdriver log 存取連結
+    fprintf("All messages are written at file %s", GCPLog::getLocalLogPath());   // 取得 log 檔案路徑
+    fprintf("All messages are export to stackdriver: %s", GCPLog::getStackDriverLink());     // 取得 stackdriver log 存取連結
     ```
 
 3. telegram 
@@ -389,13 +404,13 @@ return [
 <sub>[跳至函式](#interface6)</sub>
 
     ```php
-    use RDM\StackLogger\Facades\SettleLog;
+    use RDM\StackLogger\Facades\GCPLog;
     
     $john_user_id = '12345';
-    SettleLog::setTelegramChatIds([$john_user_id])  // 設置收訊者
+    GCPLog::setTelegramChatIds([$john_user_id])  // 設置收訊者
         ->disableTelegramNotification();        // 關閉通知聲響   
 
-    SettleLog::emergency('SOS! System Crashed');    // 送出通知
+    GCPLog::emergency('SOS! System Crashed');    // 送出通知
     ```
 
 4. 計時器 1
@@ -403,20 +418,20 @@ return [
 <sub>[跳至函式](#interface8)</sub>
 
     ```php
-   use RDM\StackLogger\Facades\SettleLog;
+   use RDM\StackLogger\Facades\GCPLog;
    
-   SettleLog::watch();     // 開始計時
+   GCPLog::watch();     // 開始計時
    
    /*
    * Code Block 1
    */
    
-   SettleLog::timing('執行 Code Block 1');
+   GCPLog::timing('執行 Code Block 1');
    
    /*
    * Code Block 2
    */
-   SettleLog::timing('執行 Code Block 2');
+   GCPLog::timing('執行 Code Block 2');
    
    /**
    範例輸出結果:
@@ -430,9 +445,9 @@ return [
 <sub>[跳至函式](#interface8)</sub>
 
     ```php
-   use RDM\StackLogger\Facades\SettleLog;
+   use RDM\StackLogger\Facades\GCPLog;
    
-    $timer = SettleLog::createTimer();
+    $timer = GCPLog::createTimer();
     $timer->setDescription('執行 Code Block 1');
     
     for($i = 5; $i > 0; $i--) {
@@ -454,15 +469,29 @@ return [
 <sub>[跳至函式](#interface9)</sub>
 
     ```php
-   use RDM\StackLogger\Facades\SettleLog;
+   use RDM\StackLogger\Facades\GCPLog;
    use Illuminate\Support\Facades\DB;
    
    $connection = 'mysql';
-   SettleLog::enableMysqlGeneralLog($connection);   // 啟用 mysql general log
+   GCPLog::enableMysqlGeneralLog($connection);   // 啟用 mysql general log
    
    DB::connection($connection)->table('users')->get(); // send query
    
-   SettleLog::disableMysqlGeneralLog($connection);   // 停用 mysql general log
+   GCPLog::disableMysqlGeneralLog($connection);   // 停用 mysql general log
+   ```
+
+7. 呼叫內部 logger 函式 (不建議) 
+<a name="example7"></a>
+<sub>[跳至函式](#interface10)</sub>
+
+    ```php
+   use RDM\StackLogger\Facades\GCPLog;
+   use Illuminate\Support\Facades\DB;
+   
+   // 選取 GCPLog 中的特定 logger, 執行其內部函式 
+   GCPLog::file()->setPath(storage_path('laravel.log'));     
+   GCPLog::console()->info('message');
+   
    ```
 
 

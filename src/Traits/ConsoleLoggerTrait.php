@@ -87,7 +87,7 @@ trait ConsoleLoggerTrait
     /**
      * @return ConsoleLogger|\Monolog\Handler\HandlerInterface|null
      */
-    private function getConsoleChannel()
+    protected function getConsoleChannel()
     {
         return $this->getMonologHandler(self::$consoleChannel);
     }
