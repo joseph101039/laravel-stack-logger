@@ -25,7 +25,7 @@
 
 ### (2) 註冊 Service Provider 以使用 Log Facade:
 
-打開 `app/config.php` 在 providers 陣列底下添加 ```RDM\StackLogger\StackLoggerServiceProvider``` 註冊 facade
+打開 `config/app.php` 在 providers 陣列底下添加 ```RDM\StackLogger\StackLoggerServiceProvider``` 註冊 facade
 
 ```php
 'providers' => [
