@@ -75,7 +75,7 @@ class TelegramLogger extends PsrHandler
     public function log($log_level, $message, array $context)
     {
         $text =  $this->messageTransform($message, $context);
-        $this->sendNotification("[$log_level] $text");
+        $this->sendNotification("$text");
     }
 
     /**
@@ -123,6 +123,11 @@ class TelegramLogger extends PsrHandler
     public function enableNotification()
     {
         $this->disableNotification = false;
+    }
+
+    public function setApiKey($api_key)
+    {
+        $this->apiKey = $api_key;
     }
 
     /**
