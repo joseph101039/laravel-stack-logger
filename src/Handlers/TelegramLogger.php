@@ -53,7 +53,7 @@ class TelegramLogger extends PsrHandler
     {
         $log_level = strtoupper($method);
         if (defined("\Psr\Log\LogLevel::{$log_level}")) {
-            $this->log($log_level, $message = $parameters[0], $context = $parameters[1]);
+            $this->log($log_level, $message = $parameters[0], $context = $parameters[1] ?? []);
         }
     }
 
