@@ -73,6 +73,17 @@ trait TelegramLoggerTrait
         return $this;
     }
 
+    /**
+     * 設置 telegram bot api key
+     * @param $api_key
+     *
+     * @return $this
+     */
+    public function setTelegramApiKey($api_key)
+    {
+        $this->getTelegramChannel()->setApiKey($api_key);
+        return $this;
+    }
 
     /**
      * @return TelegramLogger|\Monolog\Handler\HandlerInterface|null

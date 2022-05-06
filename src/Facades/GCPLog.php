@@ -59,6 +59,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static self removeTelegramChatId(string $chat_id) 移除一位通知者 (傳入 user id)
  * @method static self disableTelegramNotification() 關閉通知提示音
  * @method static self enableTelegramNotification() 開啟通知提示音
+ * @method static self setTelegramApiKey(string $api_key) 設置 telegram bot api key 取代 config 預設值
  *
  * 例外處理
  * @method static void renderException(\Exception $e, $render_type = 'editor', $verbosity = true) - 渲染 exception 成漂亮可讀訊息 (human-readable message)
