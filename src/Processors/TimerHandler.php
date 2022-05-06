@@ -44,8 +44,8 @@ class TimerHandler
             $this->lastTime = $current;
         }
 
-        $this->lastTime = $current;
         $output = sprintf("%s %.3f sec", $message, $current - $this->lastTime);
+        $this->lastTime = $current;
 
         return $output;
     }
