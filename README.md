@@ -51,7 +51,7 @@ return [
          */
         'stack_logger'   => [
             'driver'            => 'stack',
-            'channels'          => ['console', 'file', 'storage', 'stackdriver', 'telegram'],        // 指定多種 log 頻道, 可以自由添加移除
+            'channels'          => ['console', 'file'],        // 指定多種 log 頻道, 可以自由添加移除, 可用包含 'console', 'file', 'storage', 'stackdriver', 'telegram'
             'ignore_exceptions' => false,
         ],    
         /**
