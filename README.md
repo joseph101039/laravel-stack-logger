@@ -51,7 +51,7 @@ return [
          */
         'stack_logger'   => [
             'driver'            => 'stack',
-            'channels'          => ['console', 'file', 'storage', 'stackdriver', 'telegram'],        // 指定多種 log 頻道, 可以自由添加移除
+            'channels'          => ['console', 'file'],        // 指定多種 log 頻道, 可以自由添加移除 (可添加選項 : ['console', 'file', 'storage', 'stackdriver', 'telegram'])
             'ignore_exceptions' => false,
         ],    
         /**
@@ -161,11 +161,16 @@ return [
     讓你在呼叫此 log 時可以一次執行多種 channels 中的 log,
     而不用各別呼叫。
 
-    舉例來說呼叫以下這一行
+    舉例來說若是 channel 中有包含 'console', 'file', 'storage', 'stackdriver', 'telegram'。
+    
+    則呼叫以下這一行
+    
     ```php
     Log::channel('stack_logger')->info('info message');
     ```
+   
     相當於執行以下這幾行
+    
     ```php
     Log::channel('console')->info('info message');
     Log::channel('file')->info('info message');
@@ -304,7 +309,7 @@ return [
 
 | Telegram 相關 - [telegram logger](#telegram) | [範例3](#example3) |
 | :-------------------------------------------------------------| :----------------- |
-| `static self setTelegramChatIds(array $chat_ids)` | 設置接收通知者 |
+| `static self setTelegramChatIds(array $chat_ids)` | 設置接收通知者，呼叫此函式會覆蓋 config/logging.php telegram.chat_ids 中的設置 |
 | `static self addTelegramChatId(string $chat_id)` | 添加一位通知者 (傳入 user id) |
 | `static self removeTelegramChatId(string $chat_id) ` | 移除一位通知者 (傳入 user id) |
 | `static self disableTelegramNotification(string $chat_id)` | 關閉通知提示音 |
@@ -405,14 +410,26 @@ return [
 
     ```php
     use RDM\StackLogger\Facades\GCPLog;
-    
-    $john_user_id = '12345';
-    GCPLog::setTelegramChatIds([$john_user_id])  // 設置收訊者
-        ->disableTelegramNotification();        // 關閉通知聲響   
-
-    GCPLog::emergency('SOS! System Crashed');    // 送出通知
+    try {
+        $john_user_id = '12345';
+        GCPLog::setTelegramChatIds([$john_user_id])  // 設置收訊者
+            ->disableTelegramNotification();        // 關閉通知聲響   
+        
+        GCPLog::info('<b>TITLE</b> message');    // 送出通知 (支援 html 格式，若要避免請使用 `htmlspecialchars()` 跳脫或是 <pre> 包覆)
+   } catch (\Throwable $e) {
+       // html tag 限制 https://core.telegram.org/api/entities#allowed-entities
+       // 最大文字長度 : 4096 字元
+       dump($e);
+    }
+   
     ```
 
+    > 若是 config/logging.php 預設呼叫頻道 channels.stack_logger.channels 中沒有 `telegram` 則應使用 [呼叫內部 logger 函式](#example7)
+    
+    ```php
+    GCPLog::telegram()->info('<b>TITLE</b> message');
+   ```
+    
 4. 計時器 1
 <a name="example4"></a>
 <sub>[跳至函式](#interface8)</sub>
@@ -480,8 +497,8 @@ return [
    GCPLog::disableMysqlGeneralLog($connection);   // 停用 mysql general log
    ```
 
-7. 呼叫內部 logger 函式 (不建議) 
-<a name="example7"></a>
+7. 呼叫內部 logger : 函式 config/logging.php 預設呼叫頻道 channels.stack_logger.channels 中沒有包含的頻道，可以用此方法單獨呼叫。
+<a id="example7"></a>
 <sub>[跳至函式](#interface10)</sub>
 
     ```php
@@ -491,6 +508,7 @@ return [
    // 選取 GCPLog 中的特定 logger, 執行其內部函式 
    GCPLog::file()->setPath(storage_path('laravel.log'));     
    GCPLog::console()->info('message');
+   GCPLog::telegram()->info('<b>TITLE</b> message');
    
    ```
 

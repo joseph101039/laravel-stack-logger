@@ -13,6 +13,19 @@ use Psr\Log\LoggerInterface;
  * Class TelegramLogger
  *
  * @package RDM\StackLogger\Handlers
+ *
+ *
+ * @package RDM\StackLogger\Handlers
+ *
+ * PHP PSR-3 介面, 所有 logger 共同支援
+ * @method static void emergency(string $out, array $context = [])    System is unusable
+ * @method static void alert(string $out, array $context = [])        Action must be taken immediately
+ * @method static void critical(string $out, array $context = [])     Critical conditions.
+ * @method static void error(string $out, array $context = [])        Runtime errors that do not require immediate action but should typically
+ * @method static void warning(string $out, array $context = [])      Exceptional occurrences that are not errors.
+ * @method static void notice(string $out, array $context = [])       Normal but significant events.
+ * @method static void info(string $out, array $context = [])         Interesting events.
+ * @method static void debug(string $out, array $context = [])        Detailed debug information.
  */
 class TelegramLogger extends PsrHandler
 {
